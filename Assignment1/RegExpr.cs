@@ -37,5 +37,41 @@ public static class RegExpr
         }
     }
 
-    public static IEnumerable<string> InnerText(string html, string tag) => throw new NotImplementedException();
+    public static IEnumerable<string> InnerText(string html, string tag)
+    {
+        string tmp = @$"\<{tag}.*?>(.*?)\<\/{tag}>";
+        Regex innerText = new Regex(tmp);
+
+        foreach (Match match in innerText.Matches(html))
+        {
+            yield return match.Groups[1].Value;
+        }
+    }
+
+    public static IEnumerable<string> Urls(string html)
+    {
+        string tag = "a";
+        string quotes = "\"(.*?)\"";
+        Regex RegInnerText = new Regex(@$"\<{tag}.*?>(.*?)\<\/{tag}>");
+        Regex RegQuotes = new Regex(quotes);
+
+        foreach (Match match in RegInnerText.Matches(html))
+        {
+            string tmp = string.Empty;
+            int twice = 0;
+            foreach (Match match2 in RegQuotes.Matches(match.Groups[0].Value))
+            {
+                tmp += " " +match2.Groups[1].Value;
+                twice++;
+            }
+            if (twice == 2)
+            {
+                yield return tmp.Trim();
+            }
+            else
+            {
+                yield return match.Groups[1].Value;
+            }
+        }
+    }
 }
